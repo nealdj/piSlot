@@ -1,10 +1,6 @@
 # piSlot
 
-Open source slot car track and race software for rasberry pi.
-
-## Description
-
-piSlot is designed to control slot car tracks and races with a terminal interface, using a rasberry pi to track laps and control track power.
+Open source slot car track and race software for rasberry pi. piSlot is designed to control slot car tracks and races with a terminal interface, using a rasberry pi to track laps and control track power.
 
 ## Getting Started
 
