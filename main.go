@@ -187,6 +187,7 @@ func main() {
 	}
 	fmt.Fprintf(textView, read_lap_stats())
 	textView.SetBorder(true)
+	textView.SetTitle("piSlot")
 	if err := app.SetRoot(textView, true).SetFocus(textView).Run(); err != nil {
 		panic(err)
 	}
