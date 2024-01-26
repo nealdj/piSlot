@@ -4,4 +4,4 @@ prepare-pi-dev:
 		go mod download
 
 run:
-		go run main.go
+		go run *.go
