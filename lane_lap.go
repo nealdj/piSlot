@@ -5,8 +5,10 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/stianeikeland/go-rpio/v4"
 )
@@ -20,6 +22,20 @@ type lapStats struct {
 	laps    string
 	fastLap string
 	lastLap string
+}
+
+// Colors the given string with the lane's color
+func laneColor(lane string, text string) string {
+	lane = strings.ToLower(lane)
+	var colorText string
+	switch lane {
+	case "black":
+		colorText = "[#b4b4b4]" + text + "[#b4b4b4]"
+	default:
+		colorText = "[" + lane + "]" + text + "[" + lane + "]"
+	}
+
+	return colorText
 }
 
 // Registers a lap against the lap counter if it's above the min lap time.
@@ -116,11 +132,21 @@ func updateLapTable(app *tview.Application, table *tview.Table) {
 	var laneRow int = 1
 	lapStats := readLapStats()
 	for _, lane := range lane_order {
+		laneText := paddedString(laneColor(lane, lane))
 		table.SetCell(laneRow, 0,
-			tview.NewTableCell(lane).SetAlign(tview.AlignCenter))
+			tview.NewTableCell(laneText).
+				SetAlign(tview.AlignCenter).
+				SetAttributes(tcell.AttrBold).
+				SetSelectable(false).
+				SetExpansion(0))
 		for col, stat := range lapStats[lane] {
+			colorStat := paddedString(laneColor(lane, stat))
 			table.SetCell(laneRow, col+1,
-				tview.NewTableCell(paddedString(stat)).SetAlign(tview.AlignCenter))
+				tview.NewTableCell(colorStat).
+					SetAlign(tview.AlignCenter).
+					SetAttributes(tcell.AttrBold).
+					SetSelectable(false).
+					SetExpansion(0))
 			col++
 		}
 		laneRow++

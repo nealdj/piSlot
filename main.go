@@ -41,21 +41,49 @@ func main() {
 
 	powerAll(true, 1)
 
-	table_col_names := []string{"Lane", "Laps", "Fast Lap", "Last Lap"}
-	table := tview.NewTable().
-		SetBorders(true)
-	for col, name := range table_col_names {
-		table.SetCell(0, col,
+	trackControlButtons := tview.NewList().
+		AddItem("Set Lane Time", "Turns on specific lanes for X minutes", 'a', nil).
+		AddItem("Set Track Time", "Turns on all lanes for X minutes", 'b', nil).
+		AddItem("Start Race", "Setup, and then start a race", 'c', nil).
+		AddItem("Reset Lap Counts & Time", "Sets lap counts to 0, clears fast/last lap", 'd', nil).
+		AddItem("Quit", "Press to exit", 'q', func() {
+			app.Stop()
+		})
+
+	trackControls := tview.NewFrame(trackControlButtons).
+		SetBorders(2, 2, 2, 2, 4, 4).
+		AddText("Track Controls", true, tview.AlignCenter, tcell.ColorWhite)
+
+	lapTableColNames := []string{"Lane", "Laps", "Fast Lap", "Last Lap"}
+	lapTable := tview.NewTable().
+		SetBorders(true).
+		SetBordersColor(tcell.ColorSlateGrey)
+	for col, name := range lapTableColNames {
+		lapTable.SetCell(0, col,
 			tview.NewTableCell(paddedString(name)).
 				SetAlign(tview.AlignCenter).
 				SetAttributes(tcell.AttrBold).
-				SetSelectable(false))
+				SetSelectable(false).
+				SetExpansion(10))
 	}
 	for lane, pins := range lane_layout {
-		go lapCounter(lane, pins[1], app, table)
+		go lapCounter(lane, pins[1], app, lapTable)
 	}
-	go updateLapTable(app, table)
+	go updateLapTable(app, lapTable)
 
-	app.SetRoot(table, true).SetFocus(table).Run()
+	flexScreen := tview.NewFlex().
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(tview.NewBox().
+				SetBorder(true).
+				SetTitle("piSlot"), 0, 1, false).
+			AddItem(lapTable, 0, 3, false).
+			AddItem(tview.NewBox().
+				SetBorder(true).
+				SetTitle("Stats"), 5, 1, false), 0, 2, false).
+		AddItem(trackControls, 50, 1, false)
+
+	if err := app.SetRoot(flexScreen, true).SetFocus(trackControlButtons).Run(); err != nil {
+		panic(err)
+	}
 
 }
