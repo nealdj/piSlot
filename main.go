@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"sync"
 
 	"github.com/gdamore/tcell/v2"
@@ -35,24 +36,26 @@ var (
 	min_lap_time  float64 = 1.0
 )
 
+func quitPiSlot(app *tview.Application, flexScreen *tview.Flex, trackControlButtons *tview.List) {
+	form := tview.NewForm()
+	form.AddTextView("", "Are you sure you want to quit piSlot?", 70, 2, true, false)
+	form.AddButton("Back", func() {
+		app.SetRoot(flexScreen, true).SetFocus(trackControlButtons)
+
+	})
+	form.AddButton("Quit", func() {
+		app.Stop()
+		os.Exit(0)
+	})
+	if err := app.SetRoot(form, true).SetFocus(form).Run(); err != nil {
+		panic(err)
+	}
+
+}
+
 func main() {
 
 	app := tview.NewApplication()
-
-	powerAll(true, 1)
-
-	trackControlButtons := tview.NewList().
-		AddItem("Set Lane Time", "Turns on specific lanes for X minutes", 'a', nil).
-		AddItem("Set Track Time", "Turns on all lanes for X minutes", 'b', nil).
-		AddItem("Start Race", "Setup, and then start a race", 'c', nil).
-		AddItem("Reset Lap Counts & Time", "Sets lap counts to 0, clears fast/last lap", 'd', nil).
-		AddItem("Quit", "Press to exit", 'q', func() {
-			app.Stop()
-		})
-
-	trackControls := tview.NewFrame(trackControlButtons).
-		SetBorders(2, 2, 2, 2, 4, 4).
-		AddText("Track Controls", true, tview.AlignCenter, tcell.ColorWhite)
 
 	lapTableColNames := []string{"Lane", "Laps", "Fast Lap", "Last Lap"}
 	lapTable := tview.NewTable().
@@ -71,6 +74,11 @@ func main() {
 	}
 	go updateLapTable(app, lapTable)
 
+	trackControlButtons := tview.NewList()
+	trackControls := tview.NewFrame(trackControlButtons).
+		SetBorders(2, 2, 2, 2, 4, 4).
+		AddText("Track Controls", true, tview.AlignCenter, tcell.ColorWhite)
+
 	flexScreen := tview.NewFlex().
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(tview.NewBox().
@@ -81,6 +89,16 @@ func main() {
 				SetBorder(true).
 				SetTitle("Stats"), 5, 1, false), 0, 2, false).
 		AddItem(trackControls, 50, 1, false)
+
+	trackControlButtons.AddItem("Set Lane Time", "Turns on specific lanes for X minutes", 'a', func() {
+		powerLaneForm(app, flexScreen, trackControlButtons)
+	}).
+		AddItem("Set Track Time", "Turns on all lanes for X minutes", 'b', nil).
+		AddItem("Start Race", "Setup, and then start a race", 'c', nil).
+		AddItem("Reset Lap Counts & Time", "Sets lap counts to 0, clears fast/last lap", 'd', nil).
+		AddItem("Quit", "Press to exit", 'q', func() {
+			quitPiSlot(app, flexScreen, trackControlButtons)
+		})
 
 	if err := app.SetRoot(flexScreen, true).SetFocus(trackControlButtons).Run(); err != nil {
 		panic(err)

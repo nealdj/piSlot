@@ -83,7 +83,7 @@ func lapCounter(lane string, gpio_pin int, app *tview.Application, table *tview.
 		if pin.EdgeDetected() {
 			lap(lane, time.Now().UnixMilli(), app, table)
 		}
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
 
