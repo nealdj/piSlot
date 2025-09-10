@@ -153,3 +153,10 @@ func updateLapTable(app *tview.Application, table *tview.Table) {
 	}
 	app.QueueUpdateDraw(func() {})
 }
+
+func clearCounter(app *tview.Application, table *tview.Table) {
+	last_lap_unix = make(map[string]int64)
+	lap_count_time = make(map[string][]float64)
+	updateLapTable(app, table)
+
+}

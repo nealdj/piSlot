@@ -95,7 +95,9 @@ func main() {
 	}).
 		AddItem("Set Track Time", "Turns on all lanes for X minutes", 'b', nil).
 		AddItem("Start Race", "Setup, and then start a race", 'c', nil).
-		AddItem("Reset Lap Counts & Time", "Sets lap counts to 0, clears fast/last lap", 'd', nil).
+		AddItem("Reset Lap Counts & Time", "Sets lap counts to 0, clears lap times", 'd', func() {
+
+		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			quitPiSlot(app, flexScreen, trackControlButtons)
 		})
